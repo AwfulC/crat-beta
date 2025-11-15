@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRAT - Beta Testing</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+    <!-- Баннер бета-тестирования -->
+    <div class="beta-banner" id="betaBanner">
+        <div class="beta-content">
+            <span class="beta-badge">BETA TESTING</span>
+            <span class="beta-text">Режим бета-тестирования - все данные сохраняются локально</span>
+            <button class="beta-close" onclick="closeBetaBanner()">×</button>
+        </div>
+    </div>
+
+    <div class="matrix-bg"></div>
+    <div class="container">
+        <div class="header">
+            <h1>CRAT <span class="beta-version">BETA</span></h1>
+            <p>Киберплатформа для управления распределенными системами - Бета тестирование</p>
+        </div>
+
+        <!-- Профиль пользователя -->
+        <div class="profile-section" id="profileSection">
+            <div class="profile-info">
+                <div class="profile-avatar beta-avatar">B</div>
+                <div>
+                    <div id="userName">Бета-тестер</div>
+                    <div id="userRole" style="color: #ffa500; font-size: 0.9em;">Бета-режим</div>
+                </div>
+            </div>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="statClients">0</div>
+                    <div class="stat-label">Клиентов</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statFiles">0</div>
+                    <div class="stat-label">RAT файлов</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statBalance">5000</div>
+                    <div class="stat-label">Баланс ($)</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="resetSystem()">СБРОС СИСТЕМЫ</button>
+        </div>
+
+        <!-- Главное меню -->
+        <div class="main-menu active" id="mainMenu">
+            <button class="menu-btn" onclick="showPage('users')">
+                <div style="font-size: 2em; margin-bottom: 10px;">👥</div>
+                МОИ КЛИЕНТЫ
+            </button>
+            <button class="menu-btn" onclick="showPage('createFile')">
+                <div style="font-size: 2em; margin-bottom: 10px;">📁</div>
+                СОЗДАТЬ RAT
+            </button>
+            <button class="menu-btn" onclick="showPage('market')">
+                <div style="font-size: 2em; margin-bottom: 10px;">💰</div>
+                МАРКЕТПЛЕЙС
+            </button>
+            <button class="menu-btn" onclick="showPage('stats')">
+                <div style="font-size: 2em; margin-bottom: 10px;">📊</div>
+                СТАТИСТИКА
+            </button>
+            <button class="menu-btn" onclick="showPage('demo')">
+                <div style="font-size: 2em; margin-bottom: 10px;">🎮</div>
+                ДЕМО-РЕЖИМ
+            </button>
+            <button class="menu-btn" onclick="showPage('help')">
+                <div style="font-size: 2em; margin-bottom: 10px;">❓</div>
+                ПОМОЩЬ
+            </button>
+        </div>
+
+        <!-- Страница "Мои пользователи" -->
+        <div class="page" id="usersPage">
+            <button class="back-btn" onclick="showMainMenu()">← НАЗАД</button>
+            <h2 style="margin-bottom: 30px;">УПРАВЛЕНИЕ КЛИЕНТАМИ</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label">Всего клиентов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeUsers">0</div>
+                    <div class="stat-label">Активных</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="onMarket">0</div>
+                    <div class="stat-label">На продаже</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalEarned">0</div>
+                    <div class="stat-label">Заработано ($)</div>
+                </div>
+            </div>
+
+            <div class="manual-client-add">
+                <h3 style="color: #00ff41; margin-bottom: 15px;">ДОБАВЛЕНИЕ КЛИЕНТА</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <input type="text" id="manualClientIp" placeholder="IP адрес клиента">
+                    <input type="text" id="manualClientOs" placeholder="Операционная система">
+                    <input type="text" id="manualClientCountry" placeholder="Страна">
+                    <input type="text" id="manualClientInfo" placeholder="Дополнительная информация">
+                </div>
+                <button onclick="addManualClient()" style="margin-top: 15px;">ДОБАВИТЬ КЛИЕНТА</button>
+                <button onclick="addDemoClients()" class="control-btn" style="margin-top: 10px; background: #ffa500;">ДОБАВИТЬ ДЕМО-КЛИЕНТОВ</button>
+            </div>
+
+            <div class="user-list" id="userList">
+                <div class="no-clients-message" id="noClientsMessage">
+                    Нет активных клиентов. Добавьте клиентов вручную или используйте демо-режим.
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница "Создать RAT" -->
+        <div class="page" id="createFilePage">
+            <button class="back-btn" onclick="showMainMenu()">← НАЗАД</button>
+            <h2 style="margin-bottom: 30px;">ГЕНЕРАТОР RAT - БЕТА ТЕСТИРОВАНИЕ</h2>
+            
+            <div class="build-config">
+                <h3 style="color: #00ff41; margin-bottom: 15px;">КОНФИГУРАЦИЯ RAT</h3>
+                <div class="config-option">
+                    <label>Название билда:</label>
+                    <input type="text" id="buildName" placeholder="Название вашего RAT" value="BetaRAT">
+                </div>
+                <div class="config-option">
+                    <label>Тип файла:</label>
+                    <select id="fileType">
+                        <option value="exe">EXE (Windows)</option>
+                        <option value="js">JS Script</option>
+                        <option value="vbs">VBS Script</option>
+                        <option value="doc">DOC with Macro</option>
+                        <option value="pdf">PDF Exploit</option>
+                    </select>
+                </div>
+                <div class="config-option">
+                    <label>Функции RAT:</label>
+                    <div class="functions-grid">
+                        <label><input type="checkbox" id="funcKeylogger" checked> Keylogger</label>
+                        <label><input type="checkbox" id="funcScreenshot" checked> Screenshot</label>
+                        <label><input type="checkbox" id="funcWebcam"> Webcam</label>
+                        <label><input type="checkbox" id="funcFileStealer"> File Stealer</label>
+                        <label><input type="checkbox" id="funcReverseShell" checked> Reverse Shell</label>
+                        <label><input type="checkbox" id="funcProcessManager"> Process Manager</label>
+                        <label><input type="checkbox" id="funcAudioRecord"> Audio Record</label>
+                        <label><input type="checkbox" id="funcLocationTrack"> Location Track</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="terminal" id="compileTerminal">
+                <div class="terminal-line"><span class="prompt">crat@beta-builder:~$</span> Готов к созданию RAT в бета-режиме...</div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin: 20px 0;">
+                <button onclick="generateRAT()">СОЗДАТЬ RAT</button>
+                <button onclick="generateAdvancedRAT()" class="control-btn" style="background: #ffa500;">СОЗДАТЬ ПРОДВИНУТЫЙ RAT</button>
+                <button onclick="downloadAllRATS()" class="control-btn" style="background: #0088ff;">СКАЧАТЬ ВСЕ RAT</button>
+            </div>
+
+            <div class="file-list" id="generatedFiles">
+                <div class="no-clients-message" id="noBuildsMessage">
+                    Нет созданных RAT. Создайте первый RAT для тестирования функционала.
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница "Маркетплейс" -->
+        <div class="page" id="marketPage">
+            <button class="back-btn" onclick="showMainMenu()">← НАЗАД</button>
+            <h2 style="margin-bottom: 30px;">МАРКЕТПЛЕЙС - БЕТА ТЕСТИРОВАНИЕ</h2>
+            
+            <div class="market-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="marketTotal">0</div>
+                    <div class="stat-label">Всего на продаже</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="marketSold">0</div>
+                    <div class="stat-label">Продано</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="marketEarnings">0</div>
+                    <div class="stat-label">Общий доход ($)</div>
+                </div>
+            </div>
+
+            <div class="market-actions">
+                <h3 style="color: #00ff41; margin-bottom: 15px;">МОИ ПРЕДЛОЖЕНИЯ</h3>
+                <div id="myMarketItems">
+                    <!-- Здесь будут элементы пользователя на продаже -->
+                </div>
+            </div>
+
+            <div class="market-list">
+                <h3 style="color: #00ff41; margin-bottom: 15px;">ДОСТУПНЫЕ КЛИЕНТЫ</h3>
+                <div id="marketItemsList">
+                    <!-- Здесь будут элементы других пользователей -->
+                </div>
+            </div>
+
+            <div class="market-controls" style="margin-top: 30px;">
+                <button onclick="setupDemoMarket()" class="control-btn" style="background: #ffa500;">СОЗДАТЬ ДЕМО-МАРКЕТ</button>
+                <button onclick="buyRandomClient()" class="control-btn" style="background: #00ff41;">КУПИТЬ СЛУЧАЙНОГО КЛИЕНТА</button>
+                <button onclick="sellAllClients()" class="control-btn" style="background: #ff4444;">ПРОДАТЬ ВСЕХ КЛИЕНТОВ</button>
+            </div>
+        </div>
+
+        <!-- Страница "Статистика" -->
+        <div class="page" id="statsPage">
+            <button class="back-btn" onclick="showMainMenu()">← НАЗАД</button>
+            <h2 style="margin-bottom: 30px;">СТАТИСТИКА СИСТЕМЫ - БЕТА</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card large">
+                    <div class="stat-number" id="statsTotalClients">0</div>
+                    <div class="stat-label">Всего клиентов в системе</div>
+                </div>
+                <div class="stat-card large">
+                    <div class="stat-number" id="statsActiveDeals">0</div>
+                    <div class="stat-label">Активных сделок</div>
+                </div>
+                <div class="stat-card large">
+                    <div class="stat-number" id="statsTotalRATS">0</div>
+                    <div class="stat-label">Создано RAT</div>
+                </div>
+                <div class="stat-card large">
+                    <div class="stat-number" id="statsTotalEarned">0</div>
+                    <div class="stat-label">Общий оборот ($)</div>
+                </div>
+            </div>
+
+            <div class="terminal" id="statsTerminal">
+                <div class="terminal-line"><span class="prompt">crat@beta-stats:~$</span> Загрузка статистики бета-тестирования...</div>
+            </div>
+
+            <div class="beta-testing-info">
+                <h3>📈 Статистика бета-тестирования</h3>
+                <div class="beta-stats-grid">
+                    <div class="beta-stat">
+                        <div class="beta-stat-value" id="betaSessionTime">0</div>
+                        <div class="beta-stat-label">Время сессии</div>
+                    </div>
+                    <div class="beta-stat">
+                        <div class="beta-stat-value" id="betaActionsCount">0</div>
+                        <div class="beta-stat-label">Выполнено действий</div>
+                    </div>
+                    <div class="beta-stat">
+                        <div class="beta-stat-value" id="betaFeaturesTested">0</div>
+                        <div class="beta-stat-label">Протестировано функций</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-controls" style="margin-top: 30px;">
+                <button onclick="exportStats()" class="control-btn" style="background: #0088ff;">ЭКСПОРТ СТАТИСТИКИ</button>
+                <button onclick="clearStats()" class="control-btn" style="background: #ff4444;">ОЧИСТИТЬ СТАТИСТИКУ</button>
+            </div>
+        </div>
+
+        <!-- Страница "Демо-режим" -->
+        <div class="page" id="demoPage">
+            <button class="back-btn" onclick="showMainMenu()">← НАЗАД</button>
+            <h2 style="margin-bottom: 30px;">ДЕМО-РЕЖИМ - ТЕСТИРОВАНИЕ ФУНКЦИЙ</h2>
+            
+            <div class="demo-features">
+                <div class="demo-feature">
+                    <h3>🎯 Быстрое тестирование</h3>
+                    <button onclick="quickDemoTest()" class="demo-btn">БЫСТРЫЙ ТЕСТ СИСТЕМЫ</button>
+                    <p>Автоматически создает демо-данные для тестирования всех функций</p>
+                </div>
+
+                <div class="demo-feature">
+                    <h3>👥 Демо-клиенты</h3>
+                    <button onclick="addDemoClients()" class="demo-btn">ДОБАВИТЬ ДЕМО-КЛИЕНТОВ</button>
+                    <p>Создает реалистичных клиентов для тестирования управления</p>
+                </div>
+
+                <div class="demo-feature">
+                    <h3>📁 Демо-RAT</h3>
+                    <button onclick="generateDemoRAT()" class="demo-btn">СОЗДАТЬ ДЕМО-RAT</button>
+                    <p>Генерирует тестовые RAT файлы со всеми функциями</p>
+                </div>
+
+                <div class="demo-feature">
+                    <h3>💰 Демо-маркет</h3>
+                    <button onclick="setupDemoMarket()" class="demo-btn">НАСТРОИТЬ ДЕМО-МАРКЕТ</button>
+                    <p>Создает демо-предложения на маркетплейсе</p>
+                </div>
+            </div>
+
+            <div class="terminal" id="demoTerminal">
+                <div class="terminal-line"><span class="prompt">crat@demo:~$</span> Демо-режим активирован. Выберите действие для тестирования.</div>
+            </div>
+
+            <div class="demo-controls" style="margin-top: 30px;">
+                <button onclick="stressTest()" class="control-btn" style="background: #ff4444;">ТЕСТ НАГРУЗКИ</button>
+                <button onclick="testAllFeatures()" class="control-btn" style="background: #00ff41;">ТЕСТ ВСЕХ ФУНКЦИЙ</button>
+            </div>
+        </div>
+
+        <!-- Страница "Помощь" -->
+        <div class="page" id="helpPage">
+            <button class="back-btn" onclick="showMainMenu()">← НАЗАД</button>
+            <h2 style="margin-bottom: 30px;">ПОМОЩЬ ПО БЕТА-ТЕСТИРОВАНИЮ</h2>
+            
+            <div class="help-sections">
+                <div class="help-section">
+                    <h3>🎯 Цель бета-тестирования</h3>
+                    <p>Тестирование всех функций CRAT системы без необходимости регистрации. Все данные сохраняются в вашем браузере.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3>🚀 Быстрый старт</h3>
+                    <ol>
+                        <li>Перейдите в <strong>Демо-режим</strong></li>
+                        <li>Нажмите <strong>"Быстрый тест системы"</strong></li>
+                        <li>Изучите созданные демо-данные</li>
+                        <li>Протестируйте все функции платформы</li>
+                    </ol>
+                </div>
+
+                <div class="help-section">
+                    <h3>🔧 Тестируемые функции</h3>
+                    <ul>
+                        <li>✅ Создание и настройка RAT</li>
+                        <li>✅ Управление клиентами</li>
+                        <li>✅ Работа с маркетплейсом</li>
+                        <li>✅ Торговля клиентами</li>
+                        <li>✅ Статистика и аналитика</li>
+                        <li>✅ Балансовая система</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>📝 Отзыв и баги</h3>
+                    <p>При обнаружении ошибок или для предложений по улучшению:</p>
+                    <ul>
+                        <li>Проверьте консоль браузера (F12)</li>
+                        <li>Зафиксируйте шаги воспроизведения</li>
+                        <li>Опишите ожидаемое поведение</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="help-controls" style="margin-top: 30px;">
+                <button onclick="showSystemInfo()" class="control-btn" style="background: #0088ff;">ИНФО СИСТЕМЫ</button>
+                <button onclick="testAllButtons()" class="control-btn" style="background: #00ff41;">ТЕСТ КНОПОК</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 25%, #2d2d2d 50%, #1a1a1a 75%, #0a0a0a 100%);
+            color: #00ff41;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 65, 0.03) 0px,
+                rgba(0, 255, 65, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Баннер бета-тестирования */
+        .beta-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, #ffa500, #ff8c00);
+            color: #000;
+            padding: 10px 20px;
+            z-index: 1000;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .beta-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .beta-badge {
+            background: #000;
+            color: #ffa500;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .beta-text {
+            flex: 1;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .beta-close {
+            background: none;
+            border: none;
+            color: #000;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .beta-version {
+            background: #ffa500;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.6em;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .beta-avatar {
+            background: linear-gradient(145deg, #ffa500, #ff8c00) !important;
+        }
+
+        /* Остальные стили */
+        .container {
+            max-width: 1400px;
+            margin: 80px auto 30px;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            margin-bottom: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Убрана зеленая подсветка под текстом */
+        .header::before {
+            display: none;
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4.5em;
+            font-weight: 900;
+            text-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+        }
+
+        .profile-section {
+            background: rgba(10, 10, 10, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #00ff41;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #00ff41, #00cc33);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #0a0a0a;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00ff41;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #00cc33;
+        }
+
+        .logout-btn {
+            background: linear-gradient(145deg, #ff3333, #cc0000);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .main-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .menu-btn {
+            background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+            border: 3px solid #00ff41;
+            color: #00ff41;
+            padding: 40px 30px;
+            border-radius: 15px;
+            font-size: 1.4em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-btn:hover {
+            background: linear-gradient(145deg, #00ff41, #00cc33);
+            color: #0a0a0a;
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.4);
+        }
+
+        .page {
+            display: none;
+            background: rgba(10, 10, 10, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 2px solid #00ff41;
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-btn {
+            background: linear-gradient(145deg, #ff3333, #cc0000);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        input, select, textarea, button {
+            padding: 18px;
+            margin: 15px 0;
+            border: 2px solid #00ff41;
+            background: rgba(10, 10, 10, 0.9);
+            color: #00ff41;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #00cc33;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            background: rgba(20, 20, 20, 0.9);
+        }
+
+        button {
+            background: linear-gradient(145deg, #00ff41, #00cc33);
+            color: #0a0a0a;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: linear-gradient(145deg, #00cc33, #00ff41);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 65, 0.5);
+        }
+
+        .control-btn {
+            padding: 15px 25px;
+            font-size: 1em;
+            background: linear-gradient(145deg, #333, #666);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            margin: 5px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(0, 255, 65, 0.1);
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #00ff41;
+            text-align: center;
+        }
+
+        .stat-card.large {
+            grid-column: span 2;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+        }
+
+        .terminal {
+            background: #0a0a0a;
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'JetBrains Mono', monospace;
+            color: #00ff41;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            margin: 5px 0;
+        }
+
+        .prompt {
+            color: #00cc33;
+        }
+
+        .client-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .user-list, .file-list, .link-list {
+            margin-top: 30px;
+        }
+
+        .user-item, .file-item, .link-item, .market-item {
+            background: rgba(0, 255, 65, 0.05);
+            padding: 25px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 6px solid #00ff41;
+            border-right: 1px solid #00ff41;
+            transition: all 0.3s ease;
+        }
+
+        .user-item:hover, .file-item:hover, .link-item:hover, .market-item:hover {
+            background: rgba(0, 255, 65, 0.1);
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(0, 255, 65, 0.2);
+        }
+
+        .manual-client-add {
+            background: rgba(0, 255, 65, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #00ff41;
+        }
+
+        .build-config {
+            background: rgba(0, 255, 65, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid #00ff41;
+        }
+
+        .config-option {
+            margin: 10px 0;
+        }
+
+        .config-option label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00cc33;
+        }
+
+        .functions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .functions-grid label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .no-clients-message {
+            text-align: center;
+            padding: 40px;
+            color: #00cc33;
+            font-size: 1.2em;
+        }
+
+        .market-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .price-tag {
+            background: linear-gradient(145deg, #ffd700, #ffed4e);
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .market-actions {
+            margin-bottom: 30px;
+        }
+
+        /* Демо-специфичные стили */
+        .demo-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .demo-feature {
+            background: rgba(255, 165, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ffa500;
+        }
+
+        .demo-feature h3 {
+            color: #ffa500;
+            margin-bottom: 15px;
+        }
+
+        .demo-btn {
+            background: linear-gradient(145deg, #ffa500, #ff8c00);
+            color: #000;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .demo-btn:hover {
+            background: linear-gradient(145deg, #ff8c00, #ffa500);
+        }
+
+        .beta-testing-info {
+            background: rgba(255, 165, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ffa500;
+            margin-top: 30px;
+        }
+
+        .beta-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .beta-stat {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 165, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .beta-stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffa500;
+        }
+
+        .beta-stat-label {
+            font-size: 0.9em;
+            color: #ff8c00;
+        }
+
+        .help-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .help-section {
+            background: rgba(0, 255, 65, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00ff41;
+        }
+
+        .help-section h3 {
+            color: #00ff41;
+            margin-bottom: 15px;
+        }
+
+        .help-section ul, .help-section ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .help-section li {
+            margin-bottom: 8px;
+        }
+    </style>
+
+    <script>
+        // Глобальные переменные для бета-режима
+        let currentUser = {
+            id: 'beta_tester',
+            username: 'Бета-тестер',
+            role: 'beta',
+            balance: 5000,
+            infectedClients: [],
+            builds: [],
+            totalEarned: 0,
+            clientsSold: 0,
+            personalConfig: {
+                c2Server: 'ws://beta.crat-server.com',
+                encryptionKey: CryptoJS.lib.WordArray.random(32).toString()
+            }
+        };
+
+        let usersDatabase = JSON.parse(localStorage.getItem('crat_beta_database')) || { beta_tester: currentUser };
+        let marketplaceDatabase = JSON.parse(localStorage.getItem('crat_beta_marketplace')) || { items: [] };
+        let betaStats = JSON.parse(localStorage.getItem('crat_beta_stats')) || {
+            sessionStart: Date.now(),
+            actionsCount: 0,
+            featuresTested: 0
+        };
+
+        // Инициализация бета-системы
+        function initializeBetaSystem() {
+            console.log('CRAT Beta System Initialized');
+            updateProfile();
+            loadUserClients();
+            loadUserBuilds();
+            loadMarketplace();
+            updateGlobalStats();
+            updateBetaStats();
+            startSessionTimer();
+        }
+
+        function closeBetaBanner() {
+            document.getElementById('betaBanner').style.display = 'none';
+            document.querySelector('.container').style.marginTop = '30px';
+        }
+
+        function resetSystem() {
+            if (confirm('ВНИМАНИЕ: Это сбросит все данные бета-тестирования. Продолжить?')) {
+                localStorage.removeItem('crat_beta_database');
+                localStorage.removeItem('crat_beta_marketplace');
+                localStorage.removeItem('crat_beta_stats');
+                
+                currentUser = {
+                    id: 'beta_tester',
+                    username: 'Бета-тестер',
+                    role: 'beta',
+                    balance: 5000,
+                    infectedClients: [],
+                    builds: [],
+                    totalEarned: 0,
+                    clientsSold: 0,
+                    personalConfig: {
+                        c2Server: 'ws://beta.crat-server.com',
+                        encryptionKey: CryptoJS.lib.WordArray.random(32).toString()
+                    }
+                };
+                
+                usersDatabase = { beta_tester: currentUser };
+                marketplaceDatabase = { items: [] };
+                betaStats = {
+                    sessionStart: Date.now(),
+                    actionsCount: 0,
+                    featuresTested: 0
+                };
+                
+                initializeBetaSystem();
+                alert('Система сброшена. Начните тестирование заново.');
+            }
+        }
+
+        function updateProfile() {
+            document.getElementById('userAvatar').textContent = 'B';
+            document.getElementById('userName').textContent = currentUser.username;
+            document.getElementById('userRole').textContent = 'Бета-режим';
+            
+            document.getElementById('statClients').textContent = currentUser.infectedClients.length;
+            document.getElementById('statFiles').textContent = currentUser.builds.length;
+            document.getElementById('statBalance').textContent = currentUser.balance;
+        }
+
+        function updateBetaStats() {
+            const sessionTime = Math.floor((Date.now() - betaStats.sessionStart) / 1000);
+            const minutes = Math.floor(sessionTime / 60);
+            const seconds = sessionTime % 60;
+            
+            document.getElementById('betaSessionTime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('betaActionsCount').textContent = betaStats.actionsCount;
+            document.getElementById('betaFeaturesTested').textContent = betaStats.featuresTested;
+            
+            localStorage.setItem('crat_beta_stats', JSON.stringify(betaStats));
+        }
+
+        function startSessionTimer() {
+            setInterval(updateBetaStats, 1000);
+        }
+
+        function recordAction(feature = null) {
+            betaStats.actionsCount++;
+            if (feature) {
+                betaStats.featuresTested = Math.max(betaStats.featuresTested, feature);
+            }
+            localStorage.setItem('crat_beta_stats', JSON.stringify(betaStats));
+            updateBetaStats();
+        }
+
+        // РАБОЧИЕ ФУНКЦИИ КНОПОК
+
+        function addManualClient() {
+            recordAction(1);
+            const ip = document.getElementById('manualClientIp').value || `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+            const os = document.getElementById('manualClientOs').value || 'Windows 10';
+            const country = document.getElementById('manualClientCountry').value || 'US';
+            const info = document.getElementById('manualClientInfo').value || 'Добавлен вручную';
+            
+            const newClient = {
+                id: 'CLIENT_' + Date.now(),
+                ip: ip,
+                country: country,
+                os: os,
+                info: info,
+                status: 'online',
+                firstSeen: new Date().toLocaleString(),
+                lastSeen: new Date().toLocaleString(),
+                owner: currentUser.username,
+                ownerId: currentUser.id,
+                isManual: true,
+                onMarket: false,
+                price: 0
+            };
+            
+            currentUser.infectedClients.push(newClient);
+            usersDatabase[currentUser.id] = currentUser;
+            localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+            
+            document.getElementById('manualClientIp').value = '';
+            document.getElementById('manualClientOs').value = '';
+            document.getElementById('manualClientCountry').value = '';
+            document.getElementById('manualClientInfo').value = '';
+            
+            loadUserClients();
+            updateProfile();
+            alert(`Клиент добавлен: ${ip}`);
+        }
+
+        function generateRAT() {
+            recordAction(2);
+            const buildName = document.getElementById('buildName').value || 'BetaRAT';
+            const fileType = document.getElementById('fileType').value;
+            const terminal = document.getElementById('compileTerminal');
+            
+            terminal.innerHTML = '<div class="terminal-line"><span class="prompt">crat@beta-builder:~$</span> Начало создания RAT...</div>';
+            
+            setTimeout(() => {
+                const functions = {
+                    keylogger: document.getElementById('funcKeylogger').checked,
+                    screenshot: document.getElementById('funcScreenshot').checked,
+                    webcam: document.getElementById('funcWebcam').checked,
+                    fileStealer: document.getElementById('funcFileStealer').checked,
+                    reverseShell: document.getElementById('funcReverseShell').checked,
+                    processManager: document.getElementById('funcProcessManager').checked,
+                    audioRecord: document.getElementById('funcAudioRecord').checked,
+                    locationTrack: document.getElementById('funcLocationTrack').checked
+                };
+
+                const build = {
+                    id: Date.now(),
+                    name: buildName,
+                    type: fileType,
+                    userId: currentUser.id,
+                    username: currentUser.username,
+                    created: new Date().toLocaleString(),
+                    functions: functions,
+                    payload: generateRealRATCode(functions),
+                    downloadLink: URL.createObjectURL(new Blob([generateRealRATCode(functions)], {type: 'application/octet-stream'}))
+                };
+
+                currentUser.builds.push(build);
+                usersDatabase[currentUser.id] = currentUser;
+                localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+                
+                loadUserBuilds();
+                
+                terminal.innerHTML += `<div class="terminal-line"><span class="prompt" style="color: #00ff41;">crat@beta-builder:~$</span> RAT ${buildName}.${fileType} успешно создан!</div>`;
+                alert(`RAT "${buildName}" создан успешно!`);
+            }, 2000);
+        }
+
+        function downloadAllRATS() {
+            if (currentUser.builds.length === 0) {
+                alert('Нет созданных RAT для скачивания');
+                return;
+            }
+            
+            currentUser.builds.forEach(build => {
+                const link = document.createElement('a');
+                link.href = build.downloadLink;
+                link.download = `${build.name}.${build.type}`;
+                link.click();
+            });
+            
+            alert(`Скачано ${currentUser.builds.length} RAT файлов`);
+        }
+
+        function buyRandomClient() {
+            const availableClients = marketplaceDatabase.items.filter(item => item.sellerId !== currentUser.id);
+            if (availableClients.length === 0) {
+                alert('Нет доступных клиентов для покупки');
+                return;
+            }
+            
+            const randomClient = availableClients[Math.floor(Math.random() * availableClients.length)];
+            buyClient(randomClient.id);
+        }
+
+        function sellAllClients() {
+            if (currentUser.infectedClients.length === 0) {
+                alert('Нет клиентов для продажи');
+                return;
+            }
+            
+            currentUser.infectedClients.forEach(client => {
+                if (!client.onMarket) {
+                    client.onMarket = true;
+                    client.price = Math.floor(Math.random() * 500) + 100;
+                    
+                    const marketItem = {
+                        id: 'MARKET_' + Date.now() + Math.random(),
+                        clientId: client.id,
+                        clientData: client,
+                        sellerId: currentUser.id,
+                        sellerName: currentUser.username,
+                        price: client.price,
+                        listedAt: new Date().toLocaleString()
+                    };
+                    
+                    marketplaceDatabase.items.push(marketItem);
+                }
+            });
+            
+            localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+            localStorage.setItem('crat_beta_marketplace', JSON.stringify(marketplaceDatabase));
+            
+            loadUserClients();
+            loadMarketplace();
+            alert(`Все клиенты выставлены на продажу!`);
+        }
+
+        function exportStats() {
+            const stats = {
+                user: currentUser,
+                marketplace: marketplaceDatabase,
+                betaStats: betaStats,
+                exportTime: new Date().toLocaleString()
+            };
+            
+            const dataStr = JSON.stringify(stats, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = 'crat_beta_stats.json';
+            link.click();
+            
+            alert('Статистика экспортирована в JSON файл');
+        }
+
+        function clearStats() {
+            if (confirm('Очистить всю статистику?')) {
+                betaStats.actionsCount = 0;
+                betaStats.featuresTested = 0;
+                betaStats.sessionStart = Date.now();
+                localStorage.setItem('crat_beta_stats', JSON.stringify(betaStats));
+                updateBetaStats();
+                alert('Статистика очищена');
+            }
+        }
+
+        function stressTest() {
+            recordAction(6);
+            const terminal = document.getElementById('demoTerminal');
+            terminal.innerHTML = '<div class="terminal-line"><span class="prompt">crat@stress-test:~$</span> Запуск теста нагрузки...</div>';
+            
+            let count = 0;
+            const interval = setInterval(() => {
+                if (count < 10) {
+                    addManualClient();
+                    count++;
+                    terminal.innerHTML += `<div class="terminal-line"><span class="prompt">crat@stress-test:~$</span> Добавлен клиент ${count}/10</div>`;
+                } else {
+                    clearInterval(interval);
+                    terminal.innerHTML += `<div class="terminal-line"><span class="prompt" style="color: #00ff41;">crat@stress-test:~$</span> Тест нагрузки завершен!</div>`;
+                }
+            }, 500);
+        }
+
+        function testAllFeatures() {
+            recordAction(7);
+            const terminal = document.getElementById('demoTerminal');
+            terminal.innerHTML = '<div class="terminal-line"><span class="prompt">crat@full-test:~$</span> Запуск полного теста системы...</div>';
+            
+            setTimeout(() => { addDemoClients(); terminal.innerHTML += '<div class="terminal-line"><span class="prompt">crat@full-test:~$</span> ✓ Клиенты созданы</div>'; }, 1000);
+            setTimeout(() => { generateDemoRAT(); terminal.innerHTML += '<div class="terminal-line"><span class="prompt">crat@full-test:~$</span> ✓ RAT созданы</div>'; }, 2000);
+            setTimeout(() => { setupDemoMarket(); terminal.innerHTML += '<div class="terminal-line"><span class="prompt">crat@full-test:~$</span> ✓ Маркет настроен</div>'; }, 3000);
+            setTimeout(() => { terminal.innerHTML += '<div class="terminal-line"><span class="prompt" style="color: #00ff41;">crat@full-test:~$</span> ✓ Все функции протестированы!</div>'; }, 4000);
+        }
+
+        function showSystemInfo() {
+            const info = `
+Системная информация:
+- User ID: ${currentUser.id}
+- Баланс: $${currentUser.balance}
+- Клиентов: ${currentUser.infectedClients.length}
+- RAT файлов: ${currentUser.builds.length}
+- Действий: ${betaStats.actionsCount}
+- Session: ${Math.floor((Date.now() - betaStats.sessionStart) / 1000)}s
+            `;
+            alert(info);
+        }
+
+        function testAllButtons() {
+            alert('Тестирование кнопок запущено!\nПроверьте консоль браузера (F12) для деталей.');
+            console.log('=== ТЕСТ КНОПОК CRAT BETA ===');
+            console.log('1. Клиенты:', currentUser.infectedClients.length);
+            console.log('2. RAT:', currentUser.builds.length);
+            console.log('3. Маркет:', marketplaceDatabase.items.length);
+            console.log('4. Баланс:', currentUser.balance);
+            console.log('5. Статистика:', betaStats);
+            console.log('=== ТЕСТ ЗАВЕРШЕН ===');
+        }
+
+        // Демо-функции
+        function quickDemoTest() {
+            recordAction(5);
+            const terminal = document.getElementById('demoTerminal');
+            terminal.innerHTML = '<div class="terminal-line"><span class="prompt">crat@demo:~$</span> Запуск комплексного теста системы...</div>';
+            
+            setTimeout(() => {
+                addDemoClients();
+                terminal.innerHTML += '<div class="terminal-line"><span class="prompt">crat@demo:~$</span> Демо-клиенты созданы</div>';
+            }, 1000);
+            
+            setTimeout(() => {
+                generateDemoRAT();
+                terminal.innerHTML += '<div class="terminal-line"><span class="prompt">crat@demo:~$</span> Демо-RAT созданы</div>';
+            }, 2000);
+            
+            setTimeout(() => {
+                setupDemoMarket();
+                terminal.innerHTML += '<div class="terminal-line"><span class="prompt" style="color: #00ff41;">crat@demo:~$</span> Комплексный тест завершен!</div>';
+            }, 3000);
+        }
+
+        function addDemoClients() {
+            recordAction(1);
+            const demoClients = [
+                {
+                    ip: '192.168.1.105',
+                    os: 'Windows 11 Pro',
+                    country: 'US',
+                    info: 'Корпоративная сеть - высокий приоритет'
+                },
+                {
+                    ip: '10.0.0.47',
+                    os: 'Linux Ubuntu 22.04',
+                    country: 'DE',
+                    info: 'Сервер разработки - ценные данные'
+                },
+                {
+                    ip: '172.16.254.3',
+                    os: 'Windows 10 Enterprise',
+                    country: 'RU',
+                    info: 'Рабочая станция - доступ к финансам'
+                }
+            ];
+
+            demoClients.forEach(clientData => {
+                const newClient = {
+                    id: 'DEMO_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                    ...clientData,
+                    status: 'online',
+                    firstSeen: new Date().toLocaleString(),
+                    lastSeen: new Date().toLocaleString(),
+                    owner: currentUser.username,
+                    ownerId: currentUser.id,
+                    isManual: true,
+                    onMarket: false,
+                    price: 0
+                };
+                
+                currentUser.infectedClients.push(newClient);
+            });
+
+            usersDatabase[currentUser.id] = currentUser;
+            localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+            
+            loadUserClients();
+            updateProfile();
+        }
+
+        function generateDemoRAT() {
+            recordAction(2);
+            const demoBuilds = [
+                {
+                    name: 'StealthRAT',
+                    type: 'exe',
+                    functions: {
+                        keylogger: true,
+                        screenshot: true,
+                        reverseShell: true,
+                        processManager: true
+                    }
+                },
+                {
+                    name: 'SpyAgent',
+                    type: 'js',
+                    functions: {
+                        keylogger: true,
+                        webcam: true,
+                        audioRecord: true,
+                        locationTrack: true
+                    }
+                }
+            ];
+
+            demoBuilds.forEach(buildConfig => {
+                const build = {
+                    id: Date.now() + Math.random(),
+                    ...buildConfig,
+                    userId: currentUser.id,
+                    username: currentUser.username,
+                    created: new Date().toLocaleString(),
+                    payload: generateRealRATCode(buildConfig.functions),
+                    downloadLink: URL.createObjectURL(new Blob([generateRealRATCode(buildConfig.functions)], {type: 'application/octet-stream'}))
+                };
+
+                currentUser.builds.push(build);
+            });
+
+            usersDatabase[currentUser.id] = currentUser;
+            localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+            
+            loadUserBuilds();
+        }
+
+        function generateAdvancedRAT() {
+            recordAction(4);
+            const buildName = document.getElementById('buildName').value || 'AdvancedRAT';
+            const fileType = document.getElementById('fileType').value;
+            const terminal = document.getElementById('compileTerminal');
+            
+            // Включаем все функции для продвинутого RAT
+            document.getElementById('funcKeylogger').checked = true;
+            document.getElementById('funcScreenshot').checked = true;
+            document.getElementById('funcWebcam').checked = true;
+            document.getElementById('funcFileStealer').checked = true;
+            document.getElementById('funcReverseShell').checked = true;
+            document.getElementById('funcProcessManager').checked = true;
+            document.getElementById('funcAudioRecord').checked = true;
+            document.getElementById('funcLocationTrack').checked = true;
+            
+            terminal.innerHTML = '<div class="terminal-line"><span class="prompt">crat@beta-builder:~$</span> Создание продвинутого RAT...</div>';
+            
+            setTimeout(() => {
+                const functions = {
+                    keylogger: true,
+                    screenshot: true,
+                    webcam: true,
+                    fileStealer: true,
+                    reverseShell: true,
+                    processManager: true,
+                    audioRecord: true,
+                    locationTrack: true
+                };
+
+                const build = {
+                    id: Date.now(),
+                    name: buildName,
+                    type: fileType,
+                    userId: currentUser.id,
+                    username: currentUser.username,
+                    created: new Date().toLocaleString(),
+                    functions: functions,
+                    payload: generateRealRATCode(functions),
+                    downloadLink: URL.createObjectURL(new Blob([generateRealRATCode(functions)], {type: 'application/octet-stream'}))
+                };
+
+                currentUser.builds.push(build);
+                usersDatabase[currentUser.id] = currentUser;
+                localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+                
+                loadUserBuilds();
+                
+                terminal.innerHTML += `<div class="terminal-line"><span class="prompt" style="color: #00ff41;">crat@beta-builder:~$</span> Продвинутый RAT ${buildName}.${fileType} создан!</div>`;
+                terminal.innerHTML += `<div class="terminal-line"><span class="prompt" style="color: #00ff41;">crat@beta-builder:~$</span> Все функции активированы!</div>`;
+            }, 2000);
+        }
+
+        function setupDemoMarket() {
+            recordAction(3);
+            // Добавляем демо-предложения на маркетплейс
+            if (currentUser.infectedClients.length > 0) {
+                const client = currentUser.infectedClients[0];
+                
+                const marketItem = {
+                    id: 'DEMO_MARKET_' + Date.now(),
+                    clientId: client.id,
+                    clientData: { ...client, onMarket: true, price: 250 },
+                    sellerId: currentUser.id,
+                    sellerName: currentUser.username,
+                    price: 250,
+                    listedAt: new Date().toLocaleString()
+                };
+                
+                marketplaceDatabase.items.push(marketItem);
+                client.onMarket = true;
+                client.price = 250;
+                
+                localStorage.setItem('crat_beta_marketplace', JSON.stringify(marketplaceDatabase));
+                localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+                
+                loadMarketplace();
+                loadUserClients();
+            }
+        }
+
+        function generateRealRATCode(functions) {
+            return `// CRAT RAT Client - Beta Version
+// Generated: ${new Date().toLocaleString()}
+
+const config = {
+    c2Server: "${currentUser.personalConfig.c2Server}",
+    userId: "${currentUser.id}",
+    functions: ${JSON.stringify(functions, null, 2)}
+};
+
+console.log("CRAT RAT Activated - Beta Testing Mode");
+console.log("Functions:", Object.keys(functions).filter(f => functions[f]));
+`;
+        }
+
+        // Остальные функции из предыдущей версии
+        function loadUserClients() {
+            if (!currentUser) return;
+            
+            const userList = document.getElementById('userList');
+            const noClientsMessage = document.getElementById('noClientsMessage');
+            
+            if (currentUser.infectedClients.length === 0) {
+                userList.innerHTML = '<div class="no-clients-message" id="noClientsMessage">Нет активных клиентов. Добавьте клиентов вручную или используйте демо-режим.</div>';
+            } else {
+                userList.innerHTML = '';
+                currentUser.infectedClients.forEach((client, index) => {
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-item';
+                    
+                    const marketButton = client.onMarket ? 
+                        `<button class="control-btn danger" onclick="removeFromMarket('${client.id}')">Снять с продажи</button>` :
+                        `<button class="control-btn success" onclick="addToMarket('${client.id}')">Выставить на продажу</button>`;
+                    
+                    userItem.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <strong style="font-size: 1.2em; color: ${client.status === 'online' ? '#00ff41' : '#ff3333'};">${client.id}</strong>
+                                ${client.onMarket ? '<span class="price-tag" style="margin-left: 10px;">$' + client.price + '</span>' : ''}
+                                <div style="color: #00cc33; font-size: 0.9em;">
+                                    IP: ${client.ip} | ${client.country} | ${client.os} | Владелец: ${client.owner}
+                                </div>
+                                ${client.info ? `<div style="color: #00cc33; margin-top: 5px;">${client.info}</div>` : ''}
+                            </div>
+                            <div class="client-controls">
+                                <button class="control-btn" onclick="sendCommand('${client.id}', 'systeminfo')">SystemInfo</button>
+                                ${marketButton}
+                                <button class="control-btn danger" onclick="removeClient('${client.id}')">Удалить</button>
+                            </div>
+                        </div>
+                    `;
+                    userList.appendChild(userItem);
+                });
+            }
+            
+            updateUserStats();
+        }
+
+        function loadUserBuilds() {
+            if (!currentUser) return;
+            
+            const fileList = document.getElementById('generatedFiles');
+            
+            if (currentUser.builds.length === 0) {
+                fileList.innerHTML = '<div class="no-clients-message" id="noBuildsMessage">Нет созданных RAT. Создайте первый RAT для тестирования функционала.</div>';
+            } else {
+                fileList.innerHTML = '';
+                currentUser.builds.forEach((build, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <strong style="font-size: 1.2em;">${build.name}.${build.type}</strong>
+                        <div style="color: #00cc33; font-size: 0.9em;">Создан: ${build.created}</div>
+                        <div style="color: #00cc33;">Функции: ${Object.keys(build.functions).filter(f => build.functions[f]).join(', ')}</div>
+                        <div style="margin-top: 10px;">
+                            <a href="${build.downloadLink}" download="${build.name}.${build.type}" 
+                               style="color: #00ff41; text-decoration: none; font-weight: 600; margin-right: 10px;">
+                               ⬇️ СКАЧАТЬ RAT
+                            </a>
+                            <button onclick="testRAT(${index})" class="control-btn">Тестировать</button>
+                        </div>
+                    `;
+                    fileList.appendChild(fileItem);
+                });
+            }
+        }
+
+        function loadMarketplace() {
+            if (!currentUser) return;
+            
+            const myMarketItems = document.getElementById('myMarketItems');
+            const marketItemsList = document.getElementById('marketItemsList');
+            
+            // Мои предложения
+            const myItems = marketplaceDatabase.items.filter(item => item.sellerId === currentUser.id);
+            if (myItems.length === 0) {
+                myMarketItems.innerHTML = '<div class="no-clients-message">У вас нет клиентов на продаже</div>';
+            } else {
+                myMarketItems.innerHTML = '';
+                myItems.forEach(item => {
+                    const marketItem = document.createElement('div');
+                    marketItem.className = 'market-item';
+                    marketItem.innerHTML = `
+                        <strong style="font-size: 1.2em;">${item.clientData.id}</strong>
+                        <span class="price-tag">$${item.price}</span>
+                        <div style="color: #00cc33; font-size: 0.9em;">
+                            IP: ${item.clientData.ip} | ${item.clientData.country} | ${item.clientData.os}
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <button class="control-btn danger" onclick="removeFromMarket('${item.clientId}')">Снять с продажи</button>
+                        </div>
+                    `;
+                    myMarketItems.appendChild(marketItem);
+                });
+            }
+            
+            // Предложения других пользователей
+            const otherItems = marketplaceDatabase.items.filter(item => item.sellerId !== currentUser.id);
+            if (otherItems.length === 0) {
+                marketItemsList.innerHTML = '<div class="no-clients-message">Нет доступных клиентов для покупки</div>';
+            } else {
+                marketItemsList.innerHTML = '';
+                otherItems.forEach(item => {
+                    const marketItem = document.createElement('div');
+                    marketItem.className = 'market-item';
+                    marketItem.innerHTML = `
+                        <strong style="font-size: 1.2em;">${item.clientData.id}</strong>
+                        <span class="price-tag">$${item.price}</span>
+                        <div style="color: #00cc33; font-size: 0.9em;">
+                            Продавец: ${item.sellerName} | IP: ${item.clientData.ip} | ${item.clientData.country} | ${item.clientData.os}
+                        </div>
+                        ${item.clientData.info ? `<div style="color: #00cc33;">${item.clientData.info}</div>` : ''}
+                        <div style="margin-top: 10px;">
+                            <button class="control-btn success" onclick="buyClient('${item.id}')">КУПИТЬ за $${item.price}</button>
+                        </div>
+                    `;
+                    marketItemsList.appendChild(marketItem);
+                });
+            }
+            
+            updateMarketStats();
+        }
+
+        function addToMarket(clientId) {
+            const client = currentUser.infectedClients.find(c => c.id === clientId);
+            if (!client) return;
+            
+            const price = prompt('Введите цену продажи ($):', '100');
+            if (!price || isNaN(price) || price < 10) {
+                alert('Введите корректную цену (минимум $10)');
+                return;
+            }
+            
+            client.onMarket = true;
+            client.price = parseInt(price);
+            
+            const marketItem = {
+                id: 'MARKET_' + Date.now(),
+                clientId: clientId,
+                clientData: client,
+                sellerId: currentUser.id,
+                sellerName: currentUser.username,
+                price: parseInt(price),
+                listedAt: new Date().toLocaleString()
+            };
+            
+            marketplaceDatabase.items.push(marketItem);
+            
+            usersDatabase[currentUser.id] = currentUser;
+            localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+            localStorage.setItem('crat_beta_marketplace', JSON.stringify(marketplaceDatabase));
+            
+            loadUserClients();
+            loadMarketplace();
+        }
+
+        function removeFromMarket(clientId) {
+            const client = currentUser.infectedClients.find(c => c.id === clientId);
+            if (!client) return;
+            
+            client.onMarket = false;
+            client.price = 0;
+            
+            marketplaceDatabase.items = marketplaceDatabase.items.filter(item => 
+                !(item.clientId === clientId && item.sellerId === currentUser.id)
+            );
+            
+            usersDatabase[currentUser.id] = currentUser;
+            localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+            localStorage.setItem('crat_beta_marketplace', JSON.stringify(marketplaceDatabase));
+            
+            loadUserClients();
+            loadMarketplace();
+        }
+
+        function buyClient(marketItemId) {
+            const marketItem = marketplaceDatabase.items.find(item => item.id === marketItemId);
+            if (!marketItem) return;
+            
+            if (currentUser.balance < marketItem.price) {
+                alert('Недостаточно средств на балансе');
+                return;
+            }
+            
+            if (currentUser.id === marketItem.sellerId) {
+                alert('Нельзя купить собственного клиента');
+                return;
+            }
+            
+            currentUser.balance -= marketItem.price;
+            
+            const seller = usersDatabase[marketItem.sellerId];
+            if (seller) {
+                seller.balance += marketItem.price;
+                seller.totalEarned += marketItem.price;
+                seller.clientsSold = (seller.clientsSold || 0) + 1;
+                usersDatabase[seller.id] = seller;
+            }
+            
+            const sellerClients = seller.infectedClients.filter(c => c.id !== marketItem.clientId);
+            seller.infectedClients = sellerClients;
+            usersDatabase[seller.id] = seller;
+            
+            const newClient = {
+                ...marketItem.clientData,
+                owner: currentUser.username,
+                ownerId: currentUser.id,
+                onMarket: false,
+                price: 0
+            };
+            currentUser.infectedClients.push(newClient);
+            
+            marketplaceDatabase.items = marketplaceDatabase.items.filter(item => item.id !== marketItemId);
+            
+            usersDatabase[currentUser.id] = currentUser;
+            localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+            localStorage.setItem('crat_beta_marketplace', JSON.stringify(marketplaceDatabase));
+            
+            alert(`Клиент успешно куплен за $${marketItem.price}!`);
+            loadUserClients();
+            loadMarketplace();
+            updateProfile();
+        }
+
+        function removeClient(clientId) {
+            if (confirm('Удалить этого клиента?')) {
+                currentUser.infectedClients = currentUser.infectedClients.filter(c => c.id !== clientId);
+                
+                marketplaceDatabase.items = marketplaceDatabase.items.filter(item => 
+                    !(item.clientId === clientId && item.sellerId === currentUser.id)
+                );
+                
+                usersDatabase[currentUser.id] = currentUser;
+                localStorage.setItem('crat_beta_database', JSON.stringify(usersDatabase));
+                localStorage.setItem('crat_beta_marketplace', JSON.stringify(marketplaceDatabase));
+                
+                loadUserClients();
+                loadMarketplace();
+                updateProfile();
+            }
+        }
+
+        function sendCommand(clientId, command) {
+            alert(`Команда "${command}" отправлена клиенту ${clientId}`);
+        }
+
+        function testRAT(buildIndex) {
+            const build = currentUser.builds[buildIndex];
+            alert(`Тестирование RAT: ${build.name}\nФункции: ${Object.keys(build.functions).filter(f => build.functions[f]).join(', ')}`);
+        }
+
+        function updateUserStats() {
+            if (!currentUser) return;
+            
+            const onMarketCount = currentUser.infectedClients.filter(c => c.onMarket).length;
+            
+            document.getElementById('totalUsers').textContent = currentUser.infectedClients.length;
+            document.getElementById('activeUsers').textContent = currentUser.infectedClients.filter(c => c.status === 'online').length;
+            document.getElementById('onMarket').textContent = onMarketCount;
+            document.getElementById('totalEarned').textContent = currentUser.totalEarned || 0;
+        }
+
+        function updateMarketStats() {
+            if (!currentUser) return;
+            
+            const totalOnMarket = marketplaceDatabase.items.length;
+            const myOnMarket = marketplaceDatabase.items.filter(item => item.sellerId === currentUser.id).length;
+            const totalEarnings = currentUser.totalEarned || 0;
+            
+            document.getElementById('marketTotal').textContent = totalOnMarket;
+            document.getElementById('marketSold').textContent = currentUser.clientsSold || 0;
+            document.getElementById('marketEarnings').textContent = totalEarnings;
+        }
+
+        function updateGlobalStats() {
+            let totalClients = 0;
+            Object.values(usersDatabase).forEach(user => {
+                totalClients += user.infectedClients.length;
+            });
+            
+            document.getElementById('statsTotalClients').textContent = totalClients;
+            document.getElementById('statsActiveDeals').textContent = marketplaceDatabase.items.length;
+            document.getElementById('statsTotalRATS').textContent = currentUser.builds.length;
+            document.getElementById('statsTotalEarned').textContent = currentUser.totalEarned || 0;
+        }
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('mainMenu').classList.remove('active');
+            document.getElementById(pageName + 'Page').classList.add('active');
+
+            if (pageName === 'users') {
+                loadUserClients();
+            } else if (pageName === 'createFile') {
+                loadUserBuilds();
+            } else if (pageName === 'market') {
+                loadMarketplace();
+            } else if (pageName === 'stats') {
+                updateGlobalStats();
+                updateBetaStats();
+            }
+        }
+
+        function showMainMenu() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('mainMenu').classList.add('active');
+            updateProfile();
+        }
+
+        // Запуск системы при загрузке
+        window.onload = initializeBetaSystem;
+    </script>
+</body>
+</html>
